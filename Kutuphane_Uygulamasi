@@ -1,0 +1,691 @@
+
+#include <windows.h>
+#include <fstream>
+#include <iostream>
+#include <stdio.h>
+#include <string>
+#include <locale.h> 
+#include <iomanip> 
+#include <ctime>
+#pragma warning(disable:4996)
+using namespace std;
+
+
+
+void  menu() {
+	int girdi1;
+
+	// Bu döngüyü her işlemden sonra tekrardan menüye dönüş yapılması ve yeniden seçenek yapılabilmesi için yaptım.
+	while (true) {
+		string tc;
+		string telefon, dogumtarihi;
+		string ad, soyad;
+		int uyeno = 1;
+		int alabilecegikitapsayisi = 3;
+		string gorevi = "Uye ";
+		string isbn;
+		string kitapisim;
+		string yazaradi;
+		string yazarsoyadi;
+		string konu;
+		string tur;
+		string sayfasayisi;
+
+		cout << " 1-) Okuyucu Kaydi" << endl;
+		cout << " 2-) Okuyucu Kaydi Guncelleme" << endl;
+		cout << " 3-) Okuyucu Silme " << endl;
+		cout << " 4-) Okuyucu uzerindeki Kitaplar Listesi" << endl;
+		cout << " 5-) Okuyucu Kitap Odunc Alma" << endl;
+		cout << " 6-) Okuyucu Kitap Geri Dondurme" << endl;
+		cout << " 7-) Kitap Ekleme" << endl;
+		cout << " 8-) Kitap Silme" << endl;
+		cout << " 9-) Kitap Duzeltme" << endl;
+		cout << " 0-) Çıkış" << endl;
+
+
+		cout << "\n Yapmak istediginiz islemi seciniz : ";
+		cin >> girdi1;
+
+		if (girdi1 == 1)
+		{
+			system("cls");
+			cout << "\n Lutfen Bilgileri Eksiksiz doldurunuz.\n " << endl;
+
+
+			cout << " TC NO:";
+			cin >> tc;
+			cout << " Adiniz (2 kelime ise birleşik yazınız):";
+			cin >> ad;
+			cout << " Soy Adiniz :";
+			cin >> soyad;
+			cout << " Telefon:";
+			cin >> telefon;
+			cout << " Dogum Tarihi (gun.ay.yil seklinde giriniz,ornek:05.11.1985): ";
+			cin >> dogumtarihi;
+
+			// if ile tc nin uzunluğunun 11 den uzun olmamasını sağladım.
+			if (tc.length() == 11)
+			{
+				// burada kayıt işlemi gerçekleştirdim.
+				ofstream dosyaYaz;
+				dosyaYaz.open("okuyucu.txt", ios::app);
+
+				dosyaYaz << tc << " " << ad << " " << soyad << " " << uyeno << " " << telefon << " " << dogumtarihi << " " << gorevi << " " << alabilecegikitapsayisi << "\n";
+
+				dosyaYaz.close();
+
+
+				cout << "\n Kayit Islemi Basariyla Gerceklesti.\n " << endl << endl;
+
+
+			}
+			else
+			{
+				cout << "\n TC 11 rakamdan oluşmalıdır\n " << endl;
+			}
+
+
+		}
+		else if (girdi1 == 2)
+		{
+
+			system("cls");
+			string TC;
+			cout << "\n Güncellenicek okuyucu TC:  ";
+			cin >> TC;
+			int kullanicivarmi = 1;
+			ifstream  DosyaOku("okuyucu.txt", ios::app);
+			ofstream  DosyaYaz("okuyucu.tmp", ios::app);
+
+			// bu döngü ile okuyucu.txt nin son satıra kadar okunmasını sağladım.
+			while (!DosyaOku.eof())
+			{
+				DosyaOku >> tc >> ad >> soyad >> uyeno >> telefon >> dogumtarihi >> gorevi >> alabilecegikitapsayisi;
+				//bu if ile son satırın 2 kere dönmesini engelledim
+				if (DosyaOku.eof()) break;
+
+				//kullanıcının girdiği tc ile dosyadaki tc aynı  mı kontrol ettirdim.
+				if (tc == TC)
+				{
+					kullanicivarmi = kullanicivarmi - 1;
+
+					cout << "\n  Kayıt için  güncel bilgileri giriniz " << endl;
+					cout << "\n  TC: "; cin >> tc;
+					cout << "\n  AD(2 isim var ise birleşik giriniz): "; cin >> ad;
+					cout << "\n  SOYAD: "; cin >> soyad;
+					cout << "\n  TELEFON: "; cin >> telefon;
+					cout << "\n  Dogum Tarihi (gun.ay.yil seklinde giriniz,ornek:05.11.1985): "; cin >> dogumtarihi;
+
+					DosyaYaz << tc << " " << ad << " " << soyad << " " << uyeno << " " << telefon << " " << dogumtarihi << " " << gorevi << " " << alabilecegikitapsayisi << "\n";
+
+				}
+				else
+				{
+					DosyaYaz << tc << " " << ad << " " << soyad << " " << uyeno << " " << telefon << " " << dogumtarihi << " " << gorevi << " " << alabilecegikitapsayisi << "\n";
+				}
+
+
+
+
+
+			}
+			// buradaki if eğer dosyada girilen tc de bir okuyucu yoksa bunu belirtmeye yarıyor.
+			if (kullanicivarmi == 1)
+			{
+				system("cls");
+				cout << "\n Böyle bir TC bulunamadı \n" << endl;
+			}
+			else
+			{
+				system("cls");
+				cout << "\n Guncelleme başarili" << endl;
+			}
+			DosyaYaz.close();
+			DosyaOku.close();
+			remove("okuyucu.txt");
+			rename("okuyucu.tmp", "okuyucu.txt");
+
+
+		}
+		else if (girdi1 == 3)
+		{
+
+			system("cls");
+			string TC;
+			string odunctarihi;
+			string donustarihi;
+			int okuyucuvarmi = 1;
+			cout << "\n Silinecek okuyucu TC:  ";
+			cin >> TC;
+
+			ofstream DosyayazOdunc("Odunc.tmp");
+			ifstream  DosyaOku("okuyucu.txt");
+			ofstream  DosyaYaz("okuyucu.tmp");
+
+			//bu döngü  bütün okuyucu.txt dosyasının okunmasını sağlıyor.
+			while (!DosyaOku.eof())
+			{
+				DosyaOku >> tc >> ad >> soyad >> uyeno >> telefon >> dogumtarihi >> gorevi >> alabilecegikitapsayisi;
+				if (DosyaOku.eof()) break;
+				// bu if dosyadaki tc ile kullanıcı tarafından girilen tc  eşit mi kontrolu yapıyor. Eşit ise silineceği için yeni dosyaya yazılmıyor.
+				if (tc == TC)
+				{
+					okuyucuvarmi = okuyucuvarmi - 1;
+					//Silinecek bilgiler yeni dosyaya yzılmayacak
+
+				}
+				else
+				{
+					DosyaYaz << tc << " " << ad << " " << soyad << " " << uyeno << " " << telefon << " " << dogumtarihi << " " << gorevi << " " << alabilecegikitapsayisi << "\n";
+				}
+
+			}
+			DosyaYaz.close();
+			DosyaOku.close();
+			ifstream DosyaOkuOdunc("Odunc.txt");
+			// bu döngü silinen kullanıcının kitaplarının geri dönmesini yani ödünç.txt den silinmesini sağlayacak
+			while (!DosyaOkuOdunc.eof())
+			{
+				DosyaOkuOdunc >> isbn >> tc >> odunctarihi >> donustarihi;
+				if (DosyaOkuOdunc.eof()) break;
+				if (tc == TC)
+				{
+					// if içine girerse dosyaya yazılmaması için boş.
+				}
+				else
+				{
+					DosyayazOdunc << isbn << " " << tc << " " << odunctarihi << " " << donustarihi << "\n";
+				}
+
+			}
+
+
+
+			DosyaOkuOdunc.close();
+			DosyayazOdunc.close();
+			;
+
+
+			remove("Odunc.txt");
+			rename("Odunc.tmp", "Odunc.txt");
+			remove("okuyucu.txt");
+			rename("okuyucu.tmp", "okuyucu.txt");
+
+			// bu if okuyucular arasında kullanıcının girdiği tc  olup olmadığını belirtiyor.
+
+			if (okuyucuvarmi == 1)
+			{
+				system("cls");
+				cout << "\n Böyle bir TC bulunamadı \n" << endl;
+			}
+			else
+			{
+				system("cls");
+				cout << "\n Silme başarili" << endl;
+			}
+		}
+		else if (girdi1 == 4) {
+			string tcsorgu;
+			string odunctarihi;
+			string teslimtarihi;
+			cout << "Lutfen TC giriniz : ";
+			cin >> tcsorgu;
+
+			ifstream DosyaOku;
+			DosyaOku.open("Odunc.txt");
+			system("cls");
+			cout << setw(32) << "ISBN" << endl;
+
+			// bu döngü  odunc.txt yi okumayı ve girilen tc nin ödünç aldığı  kitapları ekrana bastırmayı sağlıyor
+			while (!DosyaOku.eof()) {
+				DosyaOku >> isbn >> tc >> odunctarihi >> teslimtarihi;
+				if (DosyaOku.eof()) break;
+				//kullanıcı tarfından girilen tc nin dosyadaki tc ye doğru olup olmadığını kontrol ediyor doğruysa ısbn yi bastırıyor.
+				if (tc == tcsorgu) {
+					cout << "Kullanıcı üzerindeki kitap:" << setw(3) << isbn << endl;
+
+				}
+
+
+			}
+			cout << endl;
+			cout << endl;
+
+			DosyaOku.close();
+
+		}
+		else if (girdi1 == 5)
+		{
+
+			string ISBN;
+			string TC;
+			string  odunctarihi;
+			string  donustarihi;
+
+			ifstream DosyaOku;
+			ofstream DosyaYaz("Odunc.txt", ios::app);
+
+
+			cout << "\n Kitabı alacak okuyucu TC: ";
+			cin >> TC;
+			cout << "\n Alınacak kitap ISBN si giriniz: ";
+			cin >> ISBN;
+			cout << "\n Kitap alım tarihi (gun.ay.yil seklinde giriniz,ornek:05.11.1985): ";
+			cin >> odunctarihi;
+			cout << "\n Kitap iade tarihi (gun.ay.yil seklinde giriniz,ornek:05.11.1985): ";
+			cin >> donustarihi;
+			int kitaphakki = 1;
+			int isbnkontrol = 1;
+			boolean kitapVarmi = true;
+
+			DosyaOku.open("Odunc.txt");
+			// bu döngü odunc.txt de girilen ısbn ye eşit bir ısbn olup olmadığını kontrol ediyor. Eğer var ise kitapvarmi true oluyor.
+			while (!DosyaOku.eof())
+			{
+				DosyaOku >> isbn >> tc >> odunctarihi >> donustarihi;
+				if (DosyaOku.eof()) break;
+				//eğer bu if içine girerse kitabın daha önce verildiği anlaşılıyor ve kitapvarmi false oluyor.
+				if (ISBN == isbn)
+				{
+					kitapVarmi = false;
+				}
+			}
+			DosyaOku.close();
+
+			//eger girilen ısbn ye eşit kitap var ise işlemler yapılıyor.
+			if (kitapVarmi == true)
+			{
+				ifstream DosyaOkuOkuyucu("okuyucu.txt", ios::app);
+				ofstream  DosyaYazOkuyucu("okuyucu.tmp", ios::app);
+				// bu döngü okuyucu.txt dosyasının baştan sona okunmasını sağlıyor.
+				while (!DosyaOkuOkuyucu.eof())
+				{
+
+					DosyaOkuOkuyucu >> tc >> ad >> soyad >> uyeno >> telefon >> dogumtarihi >> gorevi >> alabilecegikitapsayisi;
+					if (DosyaOkuOkuyucu.eof()) break;
+
+					DosyaOku.open("Kitaplar.txt", ios::app);
+					// bu döngü kitaplar.txt dosyasının baştan sona okunmasını sağlıyor.
+					while (!DosyaOku.eof())
+					{
+						DosyaOku >> isbn >> kitapisim >> yazaradi >> yazarsoyadi >> konu >> tur >> sayfasayisi;
+						if (DosyaOku.eof()) break;
+						//  bu if eğer tc ve ısbn kullanıcı tarafından girilen tc ve ısbn ye eşit ise odunc kısmına okuycunun aldığı kitabı yazmayı ve kullanıcının kitap hakkını 1 azltmayı sağlıyor.
+						if (tc == TC && ISBN == isbn)
+						{
+							// bu if okuycunun kitap alma hakkı bitmiş ise yeni kitap almasını engelliyor.
+							if (alabilecegikitapsayisi > 0)
+							{
+
+								isbnkontrol = isbnkontrol - 1;
+								DosyaYaz << isbn << " " << tc << " " << odunctarihi << " " << donustarihi << "\n";
+								alabilecegikitapsayisi = alabilecegikitapsayisi - 1;
+								DosyaYazOkuyucu << tc << " " << ad << " " << soyad << " " << uyeno << " " << telefon << " " << dogumtarihi << " " << gorevi << " " << alabilecegikitapsayisi << "\n";
+							}
+
+							else
+							{
+								isbnkontrol = isbnkontrol - 1;
+								kitaphakki = kitaphakki - 1;
+								DosyaYazOkuyucu << tc << " " << ad << " " << soyad << " " << uyeno << " " << telefon << " " << dogumtarihi << " " << gorevi << " " << alabilecegikitapsayisi << "\n";
+								system("cls");
+								cout << "\n Kitap alma hakkınız bitmiştir." << endl;
+							}
+						}
+					}
+					DosyaOku.close();
+					// eğer tc  kullanıcnın girdiği tc ye eşit değilse hiçbir değişiklik yapılmadan bilgileri okuyucu.txt ye yazmayı sağlıyor
+					if (tc != TC)
+					{
+
+						DosyaYazOkuyucu << tc << " " << ad << " " << soyad << " " << uyeno << " " << telefon << " " << dogumtarihi << " " << gorevi << " " << alabilecegikitapsayisi << "\n";
+					}
+
+				}
+
+
+
+				DosyaOkuOkuyucu.close();
+				DosyaYaz.close();
+				DosyaYazOkuyucu.close();
+
+				remove("okuyucu.txt");
+				rename("okuyucu.tmp", "okuyucu.txt");
+
+
+
+
+				// bu if ler ile işlemin yapılıp yapılmadı belirtiliyor.
+				if (isbnkontrol == 1)
+				{
+					system("cls");
+					cout << " ISBN veya TC hatalı \n " << endl;;
+				}
+				if (isbnkontrol != 1 && kitaphakki == 1)
+				{
+					system("cls");
+					cout << " Ödünç alma işlemi başarılı \n " << endl;
+				}
+
+			}
+			// eger girilen ısbn dosya içerisinde bulunamazsa daha önce ödünç verildiği tekrar alınamayacağı belirtiliyor.
+			else
+			{
+				system("cls");
+				cout << "\n Kitap daha önce ödünç verildiği için şuan alamazsınız\n" << endl;
+			}
+
+		}
+		else if (girdi1 == 6)
+		{
+			string ISBN;
+			string oduncTarihi;
+			string donusTarihi;
+			string TC;
+			boolean kitapvarmı = false;
+			cout << "Lütfen iade edilecek kitap ISBN sini giriniz: " << endl;
+			cin >> ISBN;
+			ifstream DosyaOku;
+
+
+			DosyaOku.open("Odunc.txt");
+			// bu döngü ile odunc dosyasında  kullanıcının girdiği  ısbn ye eşit ısbn var mı kontrol ediliyor. Var ise kitapvarmı true oluyor.
+			while (!DosyaOku.eof())
+			{
+
+				DosyaOku >> isbn >> tc >> oduncTarihi >> donusTarihi;
+
+				if (ISBN == isbn)
+				{
+					kitapvarmı = true;
+				}
+			}
+			DosyaOku.close();
+			// eğer girilen ısbn dosyada var ise diğer işlemler yapılıyor.
+			if (kitapvarmı == true)
+			{
+				ifstream DosyaOkuOkuyucu;
+				ofstream DosyaYaz("Odunc.tmp");
+				ofstream DosyaYazOkuyucu("okuyucu.tmp");
+				DosyaOku.open("Odunc.txt");
+				// bu döngü ile odunc dosyasının tamamı okunuyor ve her satır sırayla atanıyor.
+				while (!DosyaOku.eof())
+				{
+					DosyaOku >> isbn >> tc >> oduncTarihi >> donusTarihi;
+					// son satırın iki kere dönmesini engelliyor
+					if (DosyaOku.eof()) break;
+					// eğer odunc dosyasındaki ısbn kullanıcının girdiği ısbn ye eşit ise kitap geri verileceği için ödünç dosyasına yazılmıyor.
+					if (isbn == ISBN)
+					{
+
+						DosyaOkuOkuyucu.open("okuyucu.txt");
+						// okuyucu dosyasının baştan sona okunmasını sağlıyor.
+						while (!DosyaOkuOkuyucu.eof())
+						{
+							DosyaOkuOkuyucu >> TC >> ad >> soyad >> uyeno >> telefon >> dogumtarihi >> gorevi >> alabilecegikitapsayisi;
+							if (DosyaOkuOkuyucu.eof()) break;
+
+							// eğer okuyucu dosyasından okunan tc kullanıcının girdiği tc ye eşit ise kitap iade edileceği için alabileceği kitap sayısı bir artıyor.Eşit değilse aynı şekil geri yazılıyor.
+							if (TC == tc)
+							{
+								alabilecegikitapsayisi = alabilecegikitapsayisi + 1;
+								DosyaYazOkuyucu << TC << " " << ad << " " << soyad << " " << uyeno << " " << telefon << " " << dogumtarihi << " " << gorevi << " " << alabilecegikitapsayisi << "\n";
+							}
+							else
+							{
+								DosyaYazOkuyucu << TC << " " << ad << " " << soyad << " " << uyeno << " " << telefon << " " << dogumtarihi << " " << gorevi << " " << alabilecegikitapsayisi << "\n";
+							}
+						}
+						DosyaOkuOkuyucu.close();
+
+
+					}
+					else
+					{
+						DosyaYaz << isbn << " " << tc << " " << oduncTarihi << " " << donusTarihi << "\n";
+					}
+				}
+				DosyaYaz.close();
+				DosyaOku.close();
+				DosyaYazOkuyucu.close();
+				remove("okuyucu.txt");
+				remove("Odunc.txt");
+
+				rename("okuyucu.tmp", "okuyucu.txt");
+				rename("Odunc.tmp", "Odunc.txt");
+				system("cls");
+				cout << "\n Kitap iade edildi\n" << endl;
+			}
+			else
+			{
+				system("cls");
+				cout << "\n Bu ISBN ye kayıtlı alınmış bir kitap bulunamadı \n" << endl;
+			}
+
+
+
+
+
+		}
+		else if (girdi1 == 7)
+		{
+
+			system("cls");
+			cout << "ISBN : ";
+			cin >> isbn;
+
+			cout << "Eklenecek Kitabin Adi (birden fazla kelime var ise birleşik giriniz):";
+			cin >> kitapisim;
+
+			cout << "Yazar Adi(birden fazla kelime var ise birleşik giriniz):";
+			cin >> yazaradi;
+
+			cout << "Yazar Soyadi : ";
+			cin >> yazarsoyadi;
+
+			cout << "Konu (birden fazla kelime var ise birleşik giriniz):";
+			cin >> konu;
+
+			cout << "Turu (birden fazla kelime var ise birleşik giriniz):";
+			cin >> tur;
+
+			cout << "Sayfa Sayisi :";
+			cin >> sayfasayisi;
+			cout << endl;
+			system("cls");
+			cout << "Kayit Islemi Basariyla Tamamlandi...\n\n";
+
+			// girilen bilgiler ile kitaplar dosyasına yeni kayıt yapılıyor.
+			ofstream DosyaYaz3;
+			DosyaYaz3.open("Kitaplar.txt", ios::app);
+			DosyaYaz3 << isbn << " " << kitapisim << " " << yazaradi << " " << yazarsoyadi << " " << konu << " " << tur << " " << sayfasayisi << "\n";
+
+			DosyaYaz3.close();
+
+		}
+		else if (girdi1 == 8)
+		{
+			string isbnsil;
+			cout << "Silmek Istediginiz Kitabin ISBN sini girin :";
+			cin >> isbnsil;
+			int kitapvarmi = 1;
+			ifstream DosyaOku("Kitaplar.txt");
+			ofstream DosyaYaz("Kitaplar.tmp");
+
+			// bu döngü ile bütün kitaplar dosyası okunuyor ve kullanıcnın girdiği ısbn ye eşit ısbn  kitabı yeni dosyaya yazılmıyor yani siliniyor.
+			while (!DosyaOku.eof())
+			{
+				DosyaOku >> isbn >> kitapisim >> yazaradi >> yazarsoyadi >> konu >> tur >> sayfasayisi;
+				// son satırın iki kere dönmesini engelliyor
+				if (DosyaOku.eof()) break;
+				// bu if içine girerse silinecek kitap bulunduğu için dosyaya yazma işlemi gerçekletirilmiyor. 
+				if (isbn == isbnsil)
+				{
+					kitapvarmi = kitapvarmi - 1;
+				}
+
+				else
+				{
+					DosyaYaz << isbn << " " << kitapisim << " " << yazaradi << " " << yazarsoyadi << " " << konu << " " << tur << " " << sayfasayisi << "\n";
+				}
+			}
+			DosyaOku.close();
+			DosyaYaz.close();
+			remove("Kitaplar.txt");
+			rename("Kitaplar.tmp", "Kitaplar.txt");
+
+			// eğer dosyada ısbn bulunamazsa burada uyarı veriyor. Bulunursa silme işlemi tamamlandığı belirtiliyor..
+			if (kitapvarmi == 1)
+			{
+				system("cls");
+				cout << "\n Böyle bir ISBN bulunamadı \n" << endl;
+			}
+			else
+			{
+				system("cls");
+				cout << "\n Silme başarili" << endl;
+			}
+		}
+		else if (girdi1 == 9)
+		{
+
+			system("cls");
+			string ISBN;
+			int kitapvarmi = 1;
+			cout << "\n Güncellenicek kitap ISBN:  ";
+			cin >> ISBN;
+
+			ifstream  DosyaOku("Kitaplar.txt", ios::app);
+			ofstream  DosyaYaz("Kitaplar.tmp", ios::app);
+			//kitaplar dosyasının baştan sona okunmasını sağlıyor.
+			while (!DosyaOku.eof())
+			{
+				DosyaOku >> isbn >> kitapisim >> yazaradi >> yazarsoyadi >> konu >> tur >> sayfasayisi;
+				if (DosyaOku.eof()) break;
+				// eğer dosyada kullanıcının girdiği ısbn ye eşit ısbn bulunursa güncel bilgiler kullanıcıdan alınıp dosyaya kayıt ediliyor.
+				if (isbn == ISBN)
+				{
+					kitapvarmi = kitapvarmi - 1;
+
+					cout << "\n  Kayıt için  güncel bilgileri giriniz " << endl;
+					cout << "\n  isbn: "; cin >> isbn;
+					cout << "\n  kitapisim(birden fazla kelime var ise birleşik giriniz): "; cin >> kitapisim;
+					cout << "\n  yazar adı(birden fazla kelime var ise birleşik giriniz): "; cin >> yazaradi;
+					cout << "\n  yazar soyadı(birden fazla kelime var ise birleşik giriniz): "; cin >> yazarsoyadi;
+					cout << "\n  konu(birden fazla kelime var ise birleşik giriniz): "; cin >> konu;
+					cout << "\n  tur(birden fazla kelime var ise birleşik giriniz): "; cin >> tur;
+					cout << "\n  sayfa sayısı: "; cin >> sayfasayisi;
+
+					DosyaYaz << isbn << " " << kitapisim << " " << yazaradi << " " << yazarsoyadi << " " << konu << " " << tur << " " << sayfasayisi << "\n";
+
+				}
+				else
+				{
+					DosyaYaz << isbn << " " << kitapisim << " " << yazaradi << " " << yazarsoyadi << " " << konu << " " << tur << " " << sayfasayisi << "\n";
+				}
+
+
+
+
+
+			}
+			DosyaYaz.close();
+			DosyaOku.close();
+			remove("Kitaplar.txt");
+			rename("Kitaplar.tmp", "Kitaplar.txt");
+			// eğer dosyada girilen ısbn yeeşit ısbn bulunamazsa kitapvarmı değeri 1 kalıyor ve bu if ile kullanıcıya belirtiliyor.
+			if (kitapvarmi == 1)
+			{
+				system("cls");
+				cout << "\n Böyle bir ISBN bulunamadı \n" << endl;
+			}
+			else
+			{
+				system("cls");
+				cout << "\n Guncelleme başarili" << endl;
+			}
+
+		}
+		else if (girdi1 == 0)
+		{
+			break;
+		}
+	}
+}
+
+
+
+
+
+
+int main()
+{
+	setlocale(LC_ALL, "Turkish");
+
+	time_t now = time(0);
+	char* dt = ctime(&now);
+
+
+	string kullaniciadi;
+	string sifre;
+
+	// ödevi  yolladığımızda kullanıcılar txt olmicağı için burada oluşturdum.
+	ofstream DosyaYazKullanici("kullanıcılar.txt");
+	DosyaYazKullanici << "bilal" << " " << 1234 << "\n";
+	DosyaYazKullanici.close();
+
+
+
+	cout << "Kutuphanemize Hosgeldiniz..." << endl << endl;
+	// kullanıcı adı ve şifresi yanlış girildiğinde tekrar kullanıcı adı ve şifre sorulması için while döngüsü yaptım.
+	while (true)
+	{
+
+		cout << "Kullanici Adinizi Giriniz: ";
+		cin >> kullaniciadi;
+		cout << "Sifrenizi Giriniz: ";
+		cin >> sifre;
+
+
+
+
+		ifstream DosyaOku2;
+		string kullaniciadlari, sifreler;
+
+		DosyaOku2.open("kullanıcılar.txt");
+
+		//bu döngü ile kullanıcılar dosyası baştan sona okunuyor.
+		while (!DosyaOku2.eof())
+		{
+			DosyaOku2 >> kullaniciadlari >> sifreler;
+			if (DosyaOku2.eof()) break;
+			// eğer kullanıcının girdiği kullanıcıadı ve şidre dosyadakiler ile eşleşirse menü açılıyor. Eşleşmez ise yanlış olduğu belirtiliyor ve tekrar soruluyor.
+			if (kullaniciadi == kullaniciadlari && sifre == sifreler)
+			{
+				cout << "Sisteme giriş saatiniz: " << dt << "\n" << endl;
+				menu();
+				time_t now = time(0);
+				char* dt = ctime(&now);
+				cout << "\n Sistemden çıkış saatiniz: " << dt;
+				return 0;
+			}
+			else 
+			{
+				cout << "Yanlis giris yaptiniz. Lutfen tekrar deneyiniz...\n\n";
+			}
+
+		}
+		DosyaOku2.close();
+
+
+                                                  
+
+
+
+	}
+
+
+
+
+
+}
